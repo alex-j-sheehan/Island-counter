@@ -1,5 +1,5 @@
 # Used to create some dynamic oceans
-from random import randint
+from random import randint, random
 from math import ceil
 
 
@@ -163,9 +163,10 @@ def count_distinct_islands(ocean):
 
     # Fancy printing shtuff
     print()
-    print(f"NUMBER OF ISLANDS: {num_islands}!")
+    # print(f"NUMBER OF ISLANDS: {num_islands}!")
     print()
-    print_distinct_islands(island_info, ocean, num_islands)
+    # print_distinct_islands(island_info, ocean, num_islands)
+    return num_islands
 
 
 def create_ocean(length, width, frequency):
@@ -196,11 +197,11 @@ def create_ocean(length, width, frequency):
     for _ in range(length):
         nodes = []
         for _ in range(width):
-            nodes.append(randint(0, frequency))
+            nodes.append(0 if random() < frequency else 1)
         ocean.append(nodes)
     return ocean
 
 # Higher the frequency number => the fewer number of/smaller size of islands
-ocean = create_ocean(length=15, width=10, frequency=3)
+ocean = create_ocean(length=15, width=10, frequency=.5)
 print_ocean(ocean)
 count_distinct_islands(ocean)
