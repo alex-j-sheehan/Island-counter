@@ -208,13 +208,17 @@ class Ocean:
                 width = self.width
             else:
                 self.width = width
-        except AttributeError:
-            raise Exception("Provide a length and width if the ocean does not already exist.")
+            if not frequency:
+                frequency = self.frequency
+            else:
+                self.frequency = frequency
+        except AttributeError as exc:
+            raise Exception("Provide a length, width, and frequency if the ocean does not already exist.")
         if not hasattr(self, 'ocean'):
             y = [None for _ in range(width)]
             self.ocean = np.array([y for _ in range(length)])
         for index, _ in enumerate(range(length)):
-            self.ocean[index] =  np.array([random() > frequency for _ in range(width)])
+            self.ocean[index] =  np.array([random() > self.frequency for _ in range(width)])
         if print:
             self.print_ocean(self.ocean)
         return self.ocean
@@ -223,4 +227,4 @@ class Ocean:
 ocean = Ocean(length=20, width=12, frequency=.1)
 ocean.count_distinct_islands(should_print=True)
 ocean.create_ocean()
-ocean.count_distinct_islands(should_print=True)
+ocean.count_distinct_islands()
