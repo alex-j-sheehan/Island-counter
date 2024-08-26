@@ -169,10 +169,9 @@ class Ocean:
         if should_print:
             print() 
             print(f"NUMBER OF ISLANDS: {num_islands}!")
+            print(num_islands)
             print()
             self.print_distinct_islands(island_info, num_islands)
-        else:
-            print(num_islands)
         return num_islands
 
 
