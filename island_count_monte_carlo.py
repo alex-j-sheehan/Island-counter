@@ -1,4 +1,4 @@
-from islands import *
+from islands import Ocean, island_count_expectation_value_1d
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -16,9 +16,9 @@ fstep = .01
 while fstep < 1:
     samps = []
     for i in range(SIMULATIONS):
-        ocean = create_ocean(length=HEIGHT, width=WIDTH, frequency=fstep)
+        ocean = Ocean(length=HEIGHT, width=WIDTH, frequency=fstep)
         #print_ocean(ocean)
-        Icount = count_distinct_islands(ocean)
+        Icount = Ocean.count_distinct_islands()
         samps.append(Icount)
     bins.append(fstep)
     binned_samps.append(np.mean(samps))
