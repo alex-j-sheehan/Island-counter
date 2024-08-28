@@ -1,6 +1,7 @@
 # Used to create some dynamic oceans
 from random import randint, random
 from math import ceil
+from itertools import permutations
 
 
 def print_ocean(ocean):
@@ -162,9 +163,9 @@ def count_distinct_islands(ocean):
                 total_found_nodes = total_found_nodes.union(current_found_nodes)
 
     # Fancy printing shtuff
-    print()
+    #print()
     # print(f"NUMBER OF ISLANDS: {num_islands}!")
-    print()
+    #print()
     # print_distinct_islands(island_info, ocean, num_islands)
     return num_islands
 
@@ -201,7 +202,16 @@ def create_ocean(length, width, frequency):
         ocean.append(nodes)
     return ocean
 
+
+def island_count_expectation_value_1d(width=10, frequency=.5):
+    return (width*frequency) - ((width-1)*frequency**2)
+
+def island_count_expectation_value_2d(width=2, height=2, frequency=.5):
+    return (4*frequency) - (6*frequency**2) + (4*frequency**3) - frequency**4
+
 # Higher the frequency number => the fewer number of/smaller size of islands
 ocean = create_ocean(length=15, width=10, frequency=.5)
 print_ocean(ocean)
 count_distinct_islands(ocean)
+
+

@@ -3,8 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-WIDTH = 100
-HEIGHT = 1
+WIDTH = 2
+HEIGHT = 2
 STEPSIZE = .02
 SIMULATIONS = 400
 
@@ -26,12 +26,10 @@ while fstep < 1:
 
 
 plt.plot(bins, binned_samps, alpha=.8, color='blue')
-plt.plot(bins, [island_count_expectation_valie_2d(WIDTH, b) for b in bins], alpha=.5, color='red')
+plt.plot(bins, [island_count_expectation_value_1d(WIDTH, b) for b in bins], alpha=.5, color='red')
 plt.title('Width: %d'%WIDTH)
 plt.legend(['Simulation', 'Expected Value'])
 plt.show()
 plt.clf()
-
-
 
 
