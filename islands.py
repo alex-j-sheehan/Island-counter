@@ -1,6 +1,7 @@
 # Used to create some dynamic oceans
 from random import randint, random
 from math import ceil
+from itertools import permutations
 import numpy as np
 
 class Ocean:
@@ -223,7 +224,25 @@ class Ocean:
             self.print_ocean(self.ocean)
         return self.ocean
 
+    def set_ocean(self, ocean, width, length):
+        self.width = width
+        self.length = length
+        self.ocean = ocean
+        self.frequency = 0
+
+def island_count_expectation_value_1d(width=10, frequency=.5):
+    return (width*frequency) - ((width-1)*frequency**2)
+
+def island_count_expectation_value_2d(width=2, height=2, frequency=.5):
+    """
+    this is not correct...
+    sorry
+    """
+    return (4*frequency) - (6*frequency**2) + (4*frequency**3) - frequency**4
+
 # Higher the frequency number => the fewer number of/smaller size of islands
+
+
 ocean = Ocean(length=20, width=12, frequency=.1)
 ocean.count_distinct_islands(should_print=True)
 ocean.create_ocean()
