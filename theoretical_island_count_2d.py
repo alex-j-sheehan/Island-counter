@@ -3,10 +3,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from itertools import permutations, product
 from sympy import cos, simplify, poly, expand, symbols
+import pandas as pd
 
 
-WIDTH = 2
-HEIGHT = 2
+WIDTH = 3
+HEIGHT = 3
 
 width = WIDTH
 length = HEIGHT
@@ -36,50 +37,88 @@ def create_every_ocean(length=2, width=2):
     return all_the_landmass, all_the_islands
 
 
-def simplify_probability_distribution(landmass, island_count, max_landmass):
+def simplify_probability_distribution(landmass, island_count, max_landmass, verbose=True, progprint=True):
     p = symbols('p')
     flag = 0
-    for i in range(len(landmass)):
+    size = len(landmass)
+    for i in range(size):
         lm, ic = landmass[i], island_count[i]
         wc = max_landmass - lm
-        #print(ic)
-        #print(lm)
-        #print(wc)
-        #print('-'*20)
         if ic!=0:
+            if verbose:
+                print('Landmass: %d out of %d' % (lm, lm + wc))
+                print('Island Count: %d' % (ic))
+                print((p ** wc) * (1 - p) ** lm)
+                print(poly(expand(ic * ((p ** wc) * (1 - p) ** lm))))
             if not flag:
                 term = poly(expand(ic * ((p ** wc) * (1 - p) ** lm)))
                 flag = 1
             else:
                 term += poly(expand(ic * ((p ** wc) * (1 - p) ** lm)))
-            #print(term)
-        else:
+        elif verbose:
             print('no islands...')
-        if not i%100:
-            pass
-            #print('%d done out of %d'%(i, len(landmass)))
+        if progprint and not i%100:
+            print('%d done out of %d'%(i, size))
+
     return term
 
 
-funky = []
-widths = []
-heights = []
-for w in range(2,9):
-    all_the_landmass, all_the_islands = create_every_ocean(w, HEIGHT)
-    print('got landmasses')
+def simplify_probability_distribution_no_ic(landmass, island_count, max_landmass, verbose=True, progprint=True):
+    p = symbols('p')
+    flag = 0
+    size = len(landmass)
+    for i in range(size):
+        lm, ic = landmass[i], island_count[i]
+        wc = max_landmass - lm
+        if ic!=0:
+            if verbose:
+                print('Landmass: %d out of %d' % (lm, lm + wc))
+                print('Island Count: %d' % (ic))
+                print((p ** wc) * (1 - p) ** lm)
+                print(poly(expand(((p ** wc) * (1 - p) ** lm))))
+            if not flag:
+                term = poly(expand(((p ** wc) * (1 - p) ** lm)))
+                flag = 1
+            else:
+                term += poly(expand(((p ** wc) * (1 - p) ** lm)))
+        elif verbose:
+            print('no islands...')
+        if progprint and not i%100:
+            print('%d done out of %d'%(i, size))
 
-    func = simplify_probability_distribution(all_the_landmass, all_the_islands, w * HEIGHT)
-    funky.append(func)
-    widths.append(w)
-    heights.append(HEIGHT)
-    print(func)
-
-    print(len(all_the_landmass))
-    print(w * HEIGHT)
-    print('width: %d \n height: %d' % (w, HEIGHT))
+    return term
 
 
-for e in funky:
-    print(e)
+#all_the_landmass, all_the_islands = create_every_ocean(3, 3)
+#print('got landmasses')
+#func = simplify_probability_distribution(all_the_landmass, all_the_islands, 3 * 3, verbose=False)
 
+funcs = []
+for w1 in range(1,6):
+    holder = {}
+    for h1 in range(1,4):
+        all_the_landmass, all_the_islands = create_every_ocean(w1, h1)
+        print('got landmasses')
+        func = simplify_probability_distribution(all_the_landmass, all_the_islands, w1 * h1, verbose=False)
+        holder[h1] = func
+    funcs.append(holder)
+
+df = pd.DataFrame.from_records(funcs)
+df.index = range(1,6)
+
+x = np.arange(0,1,.01)
+for i in range(1, 4):
+    plt.plot(x, [df[i][i].eval(x_) for x_ in x])
+    plt.show()
+    plt.clf()
+
+plt.plot(x, [func.eval(x_) for x_ in x])
+plt.show()
+plt.clf()
+
+
+
+all_the_landmass, all_the_islands = create_every_ocean(3, 3)
+print('got landmasses')
+func = simplify_probability_distribution(all_the_landmass, all_the_islands, 3 * 3, verbose=True)
 
