@@ -99,7 +99,7 @@ for w1 in range(1,6):
     for h1 in range(1,4):
         all_the_landmass, all_the_islands = create_every_ocean(w1, h1)
         print('got landmasses')
-        func = simplify_probability_distribution(all_the_landmass, all_the_islands, w1 * h1, verbose=False)
+        func = simplify_probability_distribution_no_ic(all_the_landmass, all_the_islands, w1 * h1, verbose=False)
         holder[h1] = func
     funcs.append(holder)
 

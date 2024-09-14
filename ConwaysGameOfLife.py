@@ -1,15 +1,6 @@
 import time
-
 import pyqtgraph.examples
-
-#pyqtgraph.examples.run()
-
-"""
-This example demonstrates ViewBox and AxisItem configuration to plot a correlation matrix.
-"""
-
 import numpy as np
-
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtGui, QtWidgets, mkQApp, QtCore
 from scipy import signal
@@ -93,7 +84,7 @@ corrMatrix = np.zeros((window_dim, window_dim), dtype=np.int16)
 
 print(corrMatrix)
 
-corrMatrix = acorn(corrMatrix, 250, 250)
+corrMatrix = acorn(corrMatrix, 200, 200)
 #corrMatrix = Rpentomino(corrMatrix, 200, 200)
 #corrMatrix = gosperGliderGun(corrMatrix, 20, 20)
 
