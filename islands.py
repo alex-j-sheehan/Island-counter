@@ -6,6 +6,26 @@ import numpy as np
 import plotly.graph_objects as go
 
 
+def create_cube_at_point(x, y, z, size=1):
+    # Define the 8 vertices of the cube
+    vertices = np.array([
+        [x, y, z], [x + size, y, z], [x + size, y + size, z], [x, y + size, z],
+        [x, y, z + size], [x + size, y, z + size], [x + size, y + size, z + size], [x, y + size, z + size]
+    ])
+
+    # Define the 12 triangles composing the cube (2 triangles per face)
+    faces = np.array([
+        [0, 1, 2], [0, 2, 3],  # Bottom face
+        [4, 5, 6], [4, 6, 7],  # Top face
+        [0, 1, 5], [0, 5, 4],  # Front face
+        [2, 3, 7], [2, 7, 6],  # Back face
+        [1, 2, 6], [1, 6, 5],  # Right face
+        [0, 3, 7], [0, 7, 4]  # Left face
+    ])
+
+    return vertices, faces
+
+
 def create_nested_numpy_array(sizes, current_dim=0, frequency=.1):
     """
     Recursively creates an N-dimensional NumPy array with varying sizes along each axis.
@@ -20,10 +40,9 @@ def create_nested_numpy_array(sizes, current_dim=0, frequency=.1):
     # Base case: if we've reached the last dimension, return a 1D array of zeros and ones based on frequencies
     if current_dim == len(sizes) - 1:
         return np.random.choice([0, 1], size=sizes[current_dim], p=[frequency, 1 - frequency])
-    
+
     # Recursively create arrays for each sub-dimension
     return np.array([create_nested_numpy_array(sizes, current_dim + 1, frequency) for _ in range(sizes[current_dim])])
-
 
 
 def generate_random_hex():
@@ -34,7 +53,6 @@ def generate_random_hex():
 class Ocean:
     def __init__(self, dimension_sizes=[10, 10], frequency=.1):
         self.ocean = self.create_ocean(dimension_sizes, frequency)
-
 
     def print_ocean(self):
         """
@@ -71,7 +89,8 @@ class Ocean:
                 print(row)
             print("*=============================================================*")
             print()
-
+        else:
+            print("I don't do visualizations for more than the 3rd dimension :(")
 
     def print_distinct_islands(self, island_info, num_island):
         """
@@ -82,7 +101,7 @@ class Ocean:
 
         Arguments:
             island_info: Dictionary with keys of coordinates and values associated with the island that exists at that
-            given coordinate. Island values will always be adjacent to coordinates with equal values 
+            given coordinate. Island values will always be adjacent to coordinates with equal values
                 Example: { (0,0): 0, (10, 11): 1, (10, 12): 1, ... }
 
             ocean: Nested arrays of integers
@@ -91,8 +110,6 @@ class Ocean:
             num_islands: Integer, total number of islands found within the ocean. Used for printing padding.
         """
         if len(self.dimension_sizes) == 3:
-
-            x, y, z = np.where(self.ocean == 0)
             values_flat = self.ocean.flatten()
 
             # Dictionary to store the mapping of int to hex
@@ -103,30 +120,52 @@ class Ocean:
                 # If the number hasn't been assigned a hex value, generate one
                 if num not in int_to_hex_map:
                     int_to_hex_map[num] = generate_random_hex()
-            
+
+            # Create lists to hold the cube vertices and face indices
+            vertices_list = []
+            faces_list = []
             colors = []
+
+            vertex_offset = 0  # To keep track of the offset in indices when adding multiple cubes
 
             for indx, val in enumerate(values_flat):
                 coords = np.unravel_index(indx, self.ocean.shape)
                 if val == 0:
                     island_id = island_info.get(coords)
-                    import pdb;
-                    pdb.set_trace()
-                    colors.append(int_to_hex_map.get(island_id, 'magenta'))
+                    color = int_to_hex_map.get(island_id, 'magenta')
+                    cube_vertices, cube_faces = create_cube_at_point(*coords)
 
-            fig = go.Figure(data=go.Scatter3d(
-                x=x, y=y, z=z,
-                mode='markers',
-                marker=dict(
-                    size=5,
-                    color=colors,  # Set the color for each point
-                    opacity=0.8
-                )
+                    # Add the vertices and faces for each cube
+                    vertices_list.extend(cube_vertices)
+                    faces_list.extend(cube_faces + vertex_offset)
+                    colors.extend([color] * len(cube_faces))  # Add color for each face
+
+                    vertex_offset += 8  # Each cube has 8 vertices
+
+            # Convert to numpy arrays for mesh3d
+            vertices_list = np.array(vertices_list)
+            faces_list = np.array(faces_list)
+
+            # Extract x, y, z coordinates from vertices
+            x_vertices = vertices_list[:, 0]
+            y_vertices = vertices_list[:, 1]
+            z_vertices = vertices_list[:, 2]
+
+            # Create the mesh3d plot
+            fig = go.Figure(data=go.Mesh3d(
+                x=x_vertices,
+                y=y_vertices,
+                z=z_vertices,
+                i=faces_list[:, 0],
+                j=faces_list[:, 1],
+                k=faces_list[:, 2],
+                facecolor=colors,  # Color for each face
+                opacity=0.9,
             ))
             fig.show()
         elif len(self.dimension_sizes <= 2):
             ################################################################################################################
-                                                                # old
+            # old
 
             # Maximum cell width is the number of digets of the last island found (ie island `10` = width of 2)
             maximum_cell_width = len(str(num_island))
@@ -139,7 +178,7 @@ class Ocean:
                 for y, node in enumerate(column):
                     print_string = ' ' * maximum_cell_width
                     if node == 0:
-                        current_island = island_info[(x,y)]
+                        current_island = island_info[(x, y)]
                         length_curr_island_string = len(str(current_island))
                         # The amount of padding needed for the current cell
                         amount_padding_needed = maximum_cell_width - length_curr_island_string
@@ -154,14 +193,13 @@ class Ocean:
         else:
             print("I can't print >3 dimensions...")
 
-
     def get_adjacent_positions(self, pos):
         """
         Generate all possible adjacent positions in N-dimensional space, including diagonals.
-        
+
         Parameters:
         - pos (tuple): Current position in the grid.
-        
+
         Returns:
         - list of tuples: List of all adjacent positions, including diagonals.
         """
@@ -170,24 +208,22 @@ class Ocean:
         shifts = [tuple(shift) for shift in shifts if not all(s == 0 for s in shift)]  # Exclude no movement
         return [tuple(np.array(pos) + np.array(shift)) for shift in shifts]
 
-
     def is_within_bounds(self, pos):
         """
         Check if the given position is within the bounds of the grid.
-        
+
         Parameters:
         - pos (tuple): The position to check.
-        
+
         Returns:
         - bool: True if the position is within bounds, False otherwise.
         """
 
         return all(0 <= pos[i] < self.ocean.shape[i] for i in range(len(pos)))
 
-
     def island_counting_helper(self, found_nodes, current_node_coords):
         """
-        Recursively traverse nested arrays of ints, find all connecting adjacent nodes that have a value of 0 (ie 
+        Recursively traverse nested arrays of ints, find all connecting adjacent nodes that have a value of 0 (ie
         "land") and record their coordinates. Any integer value above 0 within the nested arrays is considered "water".
         Returns an updated set of coordinates that have been scanned as well as a dictionary (coord : island association).
 
@@ -197,7 +233,7 @@ class Ocean:
 
             found_nodes: Set of node coordinates already scanned within the recursive traversal.
                 Examples: { (1,0), (3, 5), ... }
-            
+
             current_node_coords: The tuple coordinates of the node currently being scanned within the recursive traversal
         """
         if found_nodes is None:
@@ -217,12 +253,11 @@ class Ocean:
             found_nodes.add(current_node_coords)
         else:
             return found_nodes
-        
+
         for adj_pos in self.get_adjacent_positions(current_node_coords):
             self.island_counting_helper(found_nodes, adj_pos)
-        
+
         return found_nodes
-    
 
     def count_distinct_islands(self, should_print=False):
         """
@@ -258,13 +293,12 @@ class Ocean:
 
         # Fancy printing shtuff
         if should_print:
-            print() 
+            print()
             print(f"NUMBER OF ISLANDS: {num_islands}!")
             print(num_islands)
             print()
             self.print_distinct_islands(island_info, num_islands)
         return num_islands
-
 
     def create_ocean(self, dimension_sizes=None, frequency=None, print=False):
         """
@@ -311,7 +345,7 @@ class Ocean:
 
 
 def island_count_expectation_value_1d(width=10, frequency=.5):
-    return (width*frequency) - ((width-1)*frequency**2)
+    return (width * frequency) - ((width - 1) * frequency ** 2)
 
 
 def island_count_expectation_value_2d(width=2, height=2, frequency=.5):
@@ -319,10 +353,8 @@ def island_count_expectation_value_2d(width=2, height=2, frequency=.5):
     this is not correct...
     sorry
     """
-    return (4*frequency) - (6*frequency**2) + (4*frequency**3) - frequency**4
+    return (4 * frequency) - (6 * frequency ** 2) + (4 * frequency ** 3) - frequency ** 4
 
 
-ocean = Ocean(dimension_sizes=[5, 5, 5], frequency=.15)
+ocean = Ocean(dimension_sizes=[20, 20, 20], frequency=.02)
 ocean.count_distinct_islands(should_print=True)
-# ocean.create_ocean()
-# ocean.count_distinct_islands()
