@@ -8,6 +8,11 @@ HEIGHT = 2
 STEPSIZE = .02
 SIMULATIONS = 400
 
+WIDTH = 40
+HEIGHT = 40
+STEPSIZE = .01
+SIMULATIONS = 1
+
 
 binned_samps = []
 bins = []
@@ -16,9 +21,9 @@ fstep = .01
 while fstep < 1:
     samps = []
     for i in range(SIMULATIONS):
-        ocean = Ocean(length=HEIGHT, width=WIDTH, frequency=fstep)
+        ocean = Ocean(dimension_sizes=[WIDTH, HEIGHT], frequency=fstep)
         #print_ocean(ocean)
-        Icount = Ocean.count_distinct_islands()
+        Icount = ocean.count_distinct_islands()
         samps.append(Icount)
     bins.append(fstep)
     binned_samps.append(np.mean(samps))

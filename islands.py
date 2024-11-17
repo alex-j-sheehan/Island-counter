@@ -356,5 +356,5 @@ def island_count_expectation_value_2d(width=2, height=2, frequency=.5):
     return (4 * frequency) - (6 * frequency ** 2) + (4 * frequency ** 3) - frequency ** 4
 
 
-ocean = Ocean(dimension_sizes=[20, 20, 20], frequency=.02)
-ocean.count_distinct_islands(should_print=True)
+#ocean = Ocean(dimension_sizes=[20, 20, 20], frequency=.02)
+#ocean.count_distinct_islands(should_print=True)
